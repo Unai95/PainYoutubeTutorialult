@@ -186,17 +186,9 @@ def stop_drawing(event):
     prev_point = None
 
 # Función para cargar una imagen en el canvas
-def upload_image():
-    file_path = filedialog.askopenfilename(
-        title="Selecciona una imagen",
-        filetypes=[("Archivos de imagen", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")]
-    )
-    if file_path:  # Si se selecciona un archivo
-        img = Image.open(file_path)  # Abrir la imagen seleccionada
-        img.thumbnail((canvas.winfo_width(), canvas.winfo_height()))  # Redimensionar la imagen para que quepa en el canvas
-        img_tk = ImageTk.PhotoImage(img)  # Convertir la imagen a un formato compatible con tkinter
-        canvas.create_image(0, 0, anchor="nw", image=img_tk)  # Dibujar la imagen en el canvas
-        canvas.image = img_tk  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
+# La función de carga de imagen ya está definida anteriormente con lógica para
+# centrar la imagen en el canvas. Esta segunda definición sobrescribía la
+# original, por lo que se elimina para mantener el comportamiento correcto.
 
 # Eventos del lienzo
 canvas.bind("<Button-1>", start_drawing)
