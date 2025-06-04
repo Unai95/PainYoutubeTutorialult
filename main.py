@@ -1,3 +1,10 @@
+zrtvu3-codex/buscar-nuevas-implementaciones
+"""Entry point to run the PaintApp."""
+from paint_app.app import main
+
+if __name__ == "__main__":
+    main()
+
 import customtkinter as ctk
 from PIL import Image, ImageDraw, ImageTk  # Importar para mostrar imágenes en el canvas
 from tkinter import colorchooser, filedialog, messagebox  # Importar el selector de colores, cuadro de diálogo de archivos y mensajes
@@ -251,3 +258,4 @@ eraser_btn.configure(command=set_eraser)
 
 # Iniciar aplicación
 root.mainloop()
+main
