@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from PIL import Image, ImageDraw, ImageTk  # Importar para mostrar imágenes en el canvas
-from tkinter import colorchooser, filedialog  # Importar el módulo para el selector de colores y cuadro de diálogo de archivos
+from PIL import Image, ImageDraw, ImageTk, ImageGrab  # Importar para mostrar imágenes en el canvas y capturar el lienzo
+from tkinter import colorchooser, filedialog, messagebox  # Importar el selector de colores, cuadro de diálogo de archivos y mensajes
 
 # Configuración inicial
 ICON_SIZE = 30  # Tamaño del icono (30x30 píxeles)
@@ -67,6 +67,10 @@ icon_label.pack(pady=5)
 tools_frame = ctk.CTkFrame(top_frame, fg_color="transparent")
 tools_frame.pack(side="left", padx=10)
 
+# Contenedor derecho para opciones de archivo
+file_frame = ctk.CTkFrame(top_frame, fg_color="transparent")
+file_frame.pack(side="right", padx=10)
+
 tools_frame.grid_columnconfigure(0, weight=1)
 tools_frame.grid_columnconfigure(1, weight=1)
 
@@ -120,42 +124,49 @@ color_btn = ctk.CTkButton(
 
 color_btn.grid(row=1, column=3, padx=5, pady=5)
 
-# Función para cargar una imagen en el canvas
-def upload_image():
-    file_path = filedialog.askopenfilename(
-        title="Selecciona una imagen",
-        filetypes=[("Archivos de imagen", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")]
+
+# Guardar el dibujo actual como imagen PNG
+def save_project():
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".png",
+        filetypes=[("PNG", "*.png")],
+        title="Guardar dibujo"
     )
-    if file_path:  # Si se selecciona un archivo
-        img = Image.open(file_path)  # Abrir la imagen seleccionada
-        img.thumbnail((canvas.winfo_width(), canvas.winfo_height()))  # Redimensionar la imagen para que quepa en el canvas
-        img_tk = ImageTk.PhotoImage(img)  # Convertir la imagen a un formato compatible con tkinter
-        
-
-        canvas_width = canvas.winfo_width()
-        canvas_height = canvas.winfo_height()
-        img_width = img.width
-        img_height = img.height
-
-        x_center = (canvas_width - img_width) // 2
-        y_center = (canvas_height - img_height) // 2
-
-        canvas.create_image(x_center, y_center, anchor="nw", image=img_tk)  # Dibujar imagen centrada
-        canvas.image = img_tk  # Guardar referencia para evitar el garbage collector
+    if file_path:
+        root.update()
+        x = root.winfo_rootx() + canvas.winfo_x()
+        y = root.winfo_rooty() + canvas.winfo_y()
+        x1 = x + canvas.winfo_width()
+        y1 = y + canvas.winfo_height()
+        img = ImageGrab.grab(bbox=(x, y, x1, y1))
+        img.save(file_path, "PNG")
 
 
+# Abrir una imagen existente en el lienzo
+def open_project():
+    file_path = filedialog.askopenfilename(
+        title="Abrir imagen",
+        filetypes=[("PNG", "*.png"), ("Todos", "*.*")]
+    )
+    if file_path:
+        img = Image.open(file_path)
+        img.thumbnail((canvas.winfo_width(), canvas.winfo_height()))
+        img_tk = ImageTk.PhotoImage(img)
+        canvas.delete("all")
+        x_center = (canvas.winfo_width() - img.width) // 2
+        y_center = (canvas.winfo_height() - img.height) // 2
+        canvas.create_image(x_center, y_center, anchor="nw", image=img_tk)
+        canvas.image = img_tk
+
+# Botones para abrir y guardar archivos
+open_btn = ctk.CTkButton(file_frame, text="Abrir", width=80, corner_radius=5, command=open_project)
+open_btn.pack(side="left", padx=5, pady=5)
+save_btn = ctk.CTkButton(file_frame, text="Guardar", width=80, corner_radius=5, command=save_project)
+save_btn.pack(side="left", padx=5, pady=5)
 
 
 
-# Botón para subir una imagen
-upload_btn = ctk.CTkButton(
-    tools_frame,
-    text="Subir Imagen",
-    width=100,
-    corner_radius=5,
-    command=upload_image
-)
-upload_btn.grid(row=2, column=0, columnspan=4, padx=5, pady=10)
+
 
 # Área de dibujo
 canvas_frame = ctk.CTkFrame(root)
@@ -185,18 +196,6 @@ def stop_drawing(event):
     global prev_point
     prev_point = None
 
-# Función para cargar una imagen en el canvas
-def upload_image():
-    file_path = filedialog.askopenfilename(
-        title="Selecciona una imagen",
-        filetypes=[("Archivos de imagen", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")]
-    )
-    if file_path:  # Si se selecciona un archivo
-        img = Image.open(file_path)  # Abrir la imagen seleccionada
-        img.thumbnail((canvas.winfo_width(), canvas.winfo_height()))  # Redimensionar la imagen para que quepa en el canvas
-        img_tk = ImageTk.PhotoImage(img)  # Convertir la imagen a un formato compatible con tkinter
-        canvas.create_image(0, 0, anchor="nw", image=img_tk)  # Dibujar la imagen en el canvas
-        canvas.image = img_tk  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
 
 # Eventos del lienzo
 canvas.bind("<Button-1>", start_drawing)
