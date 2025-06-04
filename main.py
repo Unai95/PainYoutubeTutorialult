@@ -1,7 +1,6 @@
 import customtkinter as ctk
-from PIL import Image, ImageDraw, ImageTk  # Importar para mostrar imágenes en el canvas
+from PIL import Image, ImageDraw, ImageTk, ImageGrab  # Importar para mostrar imágenes en el canvas y capturar el lienzo
 from tkinter import colorchooser, filedialog, messagebox  # Importar el selector de colores, cuadro de diálogo de archivos y mensajes
-import os
 
 # Configuración inicial
 ICON_SIZE = 30  # Tamaño del icono (30x30 píxeles)
@@ -125,29 +124,6 @@ color_btn = ctk.CTkButton(
 
 color_btn.grid(row=1, column=3, padx=5, pady=5)
 
-# Función para cargar una imagen en el canvas
-def upload_image():
-    file_path = filedialog.askopenfilename(
-        title="Selecciona una imagen",
-        filetypes=[("Archivos de imagen", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")]
-    )
-    if file_path:  # Si se selecciona un archivo
-        img = Image.open(file_path)  # Abrir la imagen seleccionada
-        img.thumbnail((canvas.winfo_width(), canvas.winfo_height()))  # Redimensionar la imagen para que quepa en el canvas
-        img_tk = ImageTk.PhotoImage(img)  # Convertir la imagen a un formato compatible con tkinter
-        
-
-        canvas_width = canvas.winfo_width()
-        canvas_height = canvas.winfo_height()
-        img_width = img.width
-        img_height = img.height
-
-        x_center = (canvas_width - img_width) // 2
-        y_center = (canvas_height - img_height) // 2
-
-        canvas.create_image(x_center, y_center, anchor="nw", image=img_tk)  # Dibujar imagen centrada
-        canvas.image = img_tk  # Guardar referencia para evitar el garbage collector
-
 
 # Guardar el dibujo actual como imagen PNG
 def save_project():
@@ -157,11 +133,13 @@ def save_project():
         title="Guardar dibujo"
     )
     if file_path:
-        ps_temp = file_path + ".ps"
-        canvas.postscript(file=ps_temp, colormode="color")
-        img = Image.open(ps_temp)
-        img.save(file_path, "png")
-        os.remove(ps_temp)
+        root.update()
+        x = root.winfo_rootx() + canvas.winfo_x()
+        y = root.winfo_rooty() + canvas.winfo_y()
+        x1 = x + canvas.winfo_width()
+        y1 = y + canvas.winfo_height()
+        img = ImageGrab.grab(bbox=(x, y, x1, y1))
+        img.save(file_path, "PNG")
 
 
 # Abrir una imagen existente en el lienzo
@@ -189,15 +167,6 @@ save_btn.pack(side="left", padx=5, pady=5)
 
 
 
-# Botón para subir una imagen
-upload_btn = ctk.CTkButton(
-    tools_frame,
-    text="Subir Imagen",
-    width=100,
-    corner_radius=5,
-    command=upload_image
-)
-upload_btn.grid(row=2, column=0, columnspan=4, padx=5, pady=10)
 
 # Área de dibujo
 canvas_frame = ctk.CTkFrame(root)
